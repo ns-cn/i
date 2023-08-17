@@ -26,7 +26,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text("❤"),
+      child: Text("Love for ❤欣 by tangyujun"),
     );
   }
 }
