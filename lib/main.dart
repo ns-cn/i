@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
+import 'package:just_audio/just_audio.dart';
 
 void main() => runApp(const MyApp());
 
@@ -21,21 +23,54 @@ class MyApp extends StatelessWidget {
         lightSource: LightSource.topLeft,
         depth: 4,
       ),
-      home: MyHomePage(),
+      home: MyPage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class MyPage extends StatefulWidget {
+  const MyPage({super.key});
+
+  @override
+  State<MyPage> createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  final _player = AudioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.black,
+    ));
+  }
+
+  void play() async {
+    // Listen to errors during playback.
+    _player.playbackEventStream.listen((event) {},
+        onError: (Object e, StackTrace stackTrace) {
+          print('A stream error occurred: $e');
+        });
+    // Try to load audio from a source and catch any errors.
+    try {
+      // AAC example: https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac
+      await _player.setAudioSource(AudioSource.uri(Uri.parse(
+          "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac")));
+      _player.play();
+    } catch (e) {
+      print("Error loading audio source: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: NeumorphicFloatingActionButton(
-        style: const NeumorphicStyle(
-          shape: NeumorphicShape.concave,
-          boxShape: NeumorphicBoxShape.circle(),
+        style: NeumorphicStyle(
+          shape: NeumorphicShape.convex,
+          color: _iconsColor(context),
+          boxShape: const NeumorphicBoxShape.circle(),
         ),
         child: const Icon(Icons.favorite_border, size: 30),
         onPressed: () {},
@@ -46,6 +81,20 @@ class MyHomePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             NeumorphicButton(
+              onPressed: () {
+                play();
+              },
+              style: NeumorphicStyle(
+                shape: NeumorphicShape.convex,
+                boxShape:
+                    NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
+              ),
+              child: Icon(
+                Icons.play_arrow,
+                color: _iconsColor(context),
+              ),
+            ),
+            NeumorphicButton(
                 margin: const EdgeInsets.only(top: 12),
                 onPressed: () {
                   NeumorphicTheme.of(context)!.themeMode =
@@ -54,7 +103,7 @@ class MyHomePage extends StatelessWidget {
                           : ThemeMode.dark;
                 },
                 style: NeumorphicStyle(
-                  shape: NeumorphicShape.flat,
+                  shape: NeumorphicShape.concave,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
                 ),
