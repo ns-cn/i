@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:just_audio/just_audio.dart';
@@ -44,22 +45,25 @@ class _MyPageState extends State<MyPage> {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.black,
     ));
-  }
-
-  void play() async {
     // Listen to errors during playback.
     _player.playbackEventStream.listen((event) {},
         onError: (Object e, StackTrace stackTrace) {
-          print('A stream error occurred: $e');
+          if (kDebugMode) {
+            print('A stream error occurred: $e');
+          }
         });
-    // Try to load audio from a source and catch any errors.
+  }
+
+  void play() async {
     try {
-      // AAC example: https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac
+      await _player.stop();
       await _player.setAudioSource(AudioSource.uri(Uri.parse(
-          "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac")));
+          "http://music.163.com/song/media/outer/url?id=25906124.mp3")));
       _player.play();
     } catch (e) {
-      print("Error loading audio source: $e");
+      if (kDebugMode) {
+        print("Error loading audio source: $e");
+      }
     }
   }
 
@@ -80,19 +84,30 @@ class _MyPageState extends State<MyPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            NeumorphicButton(
-              onPressed: () {
-                play();
-              },
-              style: NeumorphicStyle(
-                shape: NeumorphicShape.convex,
-                boxShape:
-                    NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
-              ),
-              child: Icon(
-                Icons.play_arrow,
-                color: _iconsColor(context),
-              ),
+            Row(
+              children: [
+                const Spacer(),
+                NeumorphicButton(
+                  onPressed: () {
+                    play();
+                  },
+                  style: NeumorphicStyle(
+                    shape: NeumorphicShape.convex,
+                    boxShape:
+                        NeumorphicBoxShape.roundRect(BorderRadius.circular(8)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.play_arrow,
+                        color: _iconsColor(context),
+                      ),
+                      const Text("不要说话"),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+              ],
             ),
             NeumorphicButton(
                 margin: const EdgeInsets.only(top: 12),
